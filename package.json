@@ -1,10 +1,10 @@
 {
-  "name": "capcaitor-phaser",
-  "version": "0.1.2",
-  "description": "Skeleton Phaser app build around Ionic Capacitor which allows deployment to Android, iOS and Desktop (via Electron)",
+  "name": "drawing-app-furry-dragon",
+  "version": "0.1",
+  "description": "",
   "author": {
-    "name": "Guy Nesher",
-    "email": "nesher.guy@gmail.com"
+    "name": "Yau Lun Tang",
+    "email": "yaulun.tang@gmail.com"
   },
   "scripts": {
     "dev": "webpack-dev-server --mode development --open",

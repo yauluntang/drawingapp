@@ -15,7 +15,16 @@ To set up a webpack development server simply run ```npm run dev``` you can also
 ### Deployment
 In order to set up a deployment target simply run ```npx cap add <platformName>``` where platformName can either be android, ios or electron - directory with the platform name will be created.
 
+npx cap add android
+npx cap add ios
+
+
 once you've set up your deployment target simply run ```npm run build-<platformName>``` - for example ```npm run build-android``` this will build the app to the dist folder, copy the files into the Android project and lunch Android Studio. Running an iOS build works similarly just with Xcode
+
+
+npm run build-android
+npm run build-ios
+
 
 > keep in mind - the build process will fail if you have not installed the necessery software required to develop for your requested platform (Android / iOS). 
 
