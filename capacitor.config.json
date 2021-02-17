@@ -1,0 +1,6 @@
+{
+  "appId": "com.furrydragon.drawingapp",
+  "appName": "App",
+  "bundledWebRuntime": false,
+  "webDir": "dist"
+}
