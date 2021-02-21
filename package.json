@@ -1,6 +1,6 @@
 {
   "name": "drawing-app-furry-dragon",
-  "version": "0.1",
+  "version": "0.1.0",
   "description": "",
   "author": {
     "name": "Yau Lun Tang",
@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "webpack-dev-server --mode development --open",
+    "start": "webpack-dev-server --mode development --open",
     "build": "webpack --mode production",
     "build-android": "webpack --mode production --env.android && npx cap copy android && npx cap open android",
     "build-ios": "webpack --mode production --env.ios && npx cap copy ios && npx cap open ios",
