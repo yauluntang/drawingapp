@@ -16,7 +16,7 @@ const inverseAlpha = ( input, output ) => {
 
 
 const createEmptyPngAndSave = ( name, width, height, data ) => {
-  const dst = new PNG({ width, height });        
+  const dst = new PNG({ width, height, deflateLevel : 1, inputHasAlpha: true });        
   const buffer = PNG.sync.write(dst);
   fs.writeFileSync(name, buffer);
   const file = fs.readFileSync( name );
@@ -70,6 +70,7 @@ const boundary = ( color ) => {
 const fillAll = ( imgData ) => {
     let data = [];
     let greys = 0;
+    console.log( imgData.width, imgData.height );
     for ( let x = 0; x < imgData.width; x ++ ){
       for ( let y = 0; y < imgData.height; y ++ ){
         let color = getPixelXY( imgData, x, y );
@@ -86,15 +87,15 @@ const fillAll = ( imgData ) => {
 
 const fill = ( imgData, x, y, grey ) => {
 
-    let newData = { data: new Array(imgData.data.length), width: imgData.width, height: imgData.height };
+    let newData = { data: new Array(imgData.data.length).fill(0), width: imgData.width, height: imgData.height };
+    let filled = 0;
     let fillColor = (x,y) => {
-    let color = getPixelXY( imgData, x, y );
+    
       
-    if ( x >= 0 && y >= 0 && x < imgData.width && y < imgData.height ){
-
-
+      if ( x >= 0 && y >= 0 && x < imgData.width && y < imgData.height ){
+      let color = getPixelXY( imgData, x, y );
         if ( !boundary(color) ){
-          
+          filled ++;
           setPixelXY( imgData, x, y, [0,0,0,255] )
           setPixelXY( newData, x, y, [255,255,255,255]);
           list.push({x:x - 1, y});
@@ -115,6 +116,7 @@ const fill = ( imgData, x, y, grey ) => {
         maxlength = list.length;
       }
     }
+    console.log( filled );
     
     return newData;
 }
