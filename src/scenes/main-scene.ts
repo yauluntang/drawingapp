@@ -38,6 +38,15 @@ export class MainScene extends Phaser.Scene {
   public rawImage: any;
 
   public painted: boolean;
+  public data: any;
+
+  public layers: any;
+  public count: any;
+
+
+  public mouseDown: boolean;
+
+  public mouseCurrentlyOver: any;
 
   constructor ()
   {
@@ -65,6 +74,9 @@ export class MainScene extends Phaser.Scene {
     
 
     this.painted = false;
+    this.layers = {};
+
+    /*
     console.log( this );
 
       this.anims.create({
@@ -107,6 +119,84 @@ export class MainScene extends Phaser.Scene {
 
       this.fillGraph = this.add.graphics();
       this.fillGraph.setVisible( false );
+
+*/
+
+      this.mouseDown = false;
+      let base = this.textures.getBase64('bird');
+      console.log( base );
+      const image = new Image();
+      image.src = base;
+      image.width = window.innerWidth;
+      image.height = window.innerHeight;
+
+      image.onload = () => {
+        this.painting( image );
+      }
+    
+      this.count = 0;
+
+
+      var that = this;
+      /*
+      document.addEventListener( 'mousedown', ()=>{
+        console.log( 'pointerdown '+ this.count);
+        console.log( that );
+        if ( that.mouseCurrentlyOver ){
+          console.log( that.mouseCurrentlyOver );
+          for ( let i = 0; i < this.mouseCurrentlyOver.length; i ++ ){
+            that.mouseCurrentlyOver[i].setTint(0xff0000);
+          }
+        }
+        
+      });
+      document.addEventListener( 'mouseup', ()=>{
+        console.log( 'pointerup' + this.count );
+        this.count ++;
+      });*/
+
+      this.mouseCurrentlyOver = null;
+    
+      this.input.on('pointerdown', function(pointer, currentlyOver){ 
+        this.mouseDown = true;
+        console.log( 'pointerdown');
+        for ( let i = 0; i < currentlyOver.length; i ++ ){
+          currentlyOver[i].setTint(0xff0000);
+        }
+       });
+      
+      this.input.on('pointerup', function(pointer, currentlyOver){ 
+        this.mouseDown = false;
+        console.log( 'pointerup');
+
+       });
+      /*
+this.input.on('pointerdownoutside', function(pointer){ 
+        console.log( 'pointerdownoutside');
+       });
+    
+      this.input.on('pointerupoutside', function(pointer){
+        console.log( 'pointerupoutside');
+       });
+
+    
+      this.input.on('pointermove', function(pointer, currentlyOver){ 
+        console.log( 'pointermove');
+        if ( currentlyOver ){
+          console.log( currentlyOver );
+          this.mouseCurrentlyOver = currentlyOver;
+          //currentlyOver.setTint(0xff0000);
+          
+        }
+       });
+       /*
+      this.input.on('pointerover', function(pointer, justOver){
+        console.log( 'pointerover');
+       });
+      this.input.on('pointerout', function(pointer, justOut){
+        console.log( 'pointerout');
+      });*/
+      
       
 
 /*
@@ -150,8 +240,9 @@ export class MainScene extends Phaser.Scene {
       }*/
 
 
-      this.debug = this.add.text(10, 10, '', { font: '16px Courier', fill: '#00ff00' });
-      this.debug2 = this.add.text(10, 25, '', { font: '16px Courier', fill: '#00ff00' });
+      
+      this.debug = this.add.text(10, 10, '', { font: '16px Courier', color: '#00ff00' });
+      //this.debug2 = this.add.text(10, 25, '', { font: '16px Courier', fill: '#00ff00' });
 
 
       this.cameras.main.backgroundColor.setTo(255,255,255);
@@ -163,29 +254,6 @@ export class MainScene extends Phaser.Scene {
         }
         this.textures.addImage('area', image);
         this.rawImage = image;
-
-        setTimeout(()=>{
-          let idt = this.getImageData( this.rawImage );
-
-          console.log( 'drawStart' );
-          console.log( idt );
-          this.fillAll( idt );
-          
-          let htmlimage = this.getImage( idt );
-              
-          
-          if (this.textures.exists('temp'))
-          {
-            this.textures.remove('temp');
-          }
-          this.textures.addImage('temp', htmlimage);
-          let picture = this.add.sprite(window.innerWidth/2, window.innerHeight/2, 'temp');
-          picture.displayWidth = window.innerWidth;
-          picture.displayHeight = window.innerHeight;
-          picture.setVisible(false);
-  
-          this.rt.draw( picture, window.innerWidth/2, window.innerHeight/2 );
-        },1000);
 
 
         /*
@@ -208,6 +276,7 @@ export class MainScene extends Phaser.Scene {
   }
 
   update(time): void {
+    //this.painting();
     this.debug.setText([
         'FPS: '+ this.game.loop.actualFps
     ]);
@@ -294,32 +363,64 @@ export class MainScene extends Phaser.Scene {
     return image;
   }
 
-  drawStart( pointer ) {
+  getImage64( imageData ){
+    const cvs = document.createElement('canvas');
+    cvs.width = imageData.width; cvs.height = imageData.height;
+    const ctx = cvs.getContext("2d");
+    ctx.putImageData(imageData, 0, 0);
+    return cvs.toDataURL();
+  }
 
+  painting ( rawImage ){
     if ( !this.painted ){
-
-      let idt = this.getImageData( this.rawImage );
-
-      console.log( 'drawStart' );
-      console.log( idt );
-      this.fillAll( idt );
-      
-      let htmlimage = this.getImage( idt );
-          
-      
-      if (this.textures.exists('temp'))
-      {
-        this.textures.remove('temp');
+      if ( !rawImage ){
+        return;
       }
-      this.textures.addImage('temp', htmlimage);
-      let picture = this.add.sprite(window.innerWidth/2, window.innerHeight/2, 'temp');
-      picture.displayWidth = window.innerWidth;
-      picture.displayHeight = window.innerHeight;
-      picture.setVisible(false);
 
-      this.rt.draw( picture, window.innerWidth/2, window.innerHeight/2 );
+      let idt = this.getImageData( rawImage );
+
+      this.data = this.fillAll( idt );
+
+      //setTimeout(()=>{
+        for ( let i = 0; i < this.data.length; i ++ ){
+          let dataimage = this.getImage64( this.data[i] );
+          this.textures.addBase64( 'data_'+i, dataimage );
+          this.textures.on('addtexture', (key)=>{
+            this.layers[key] = this.add.sprite(window.innerWidth/2, window.innerHeight/2, key);
+            this.layers[key].setInteractive(this.input.makePixelPerfect(1));
+            this.debug.setDepth(1);
+          })
+          
+        }
+
+        
+  
+  
+        /*
+        let htmlimage = this.getImage( idt );
+            
+        
+        if (this.textures.exists('temp'))
+        {
+          this.textures.remove('temp');
+        }
+        this.textures.addImage('temp', htmlimage);
+        let picture = this.add.sprite(window.innerWidth/2, window.innerHeight/2, 'temp');
+        picture.displayWidth = window.innerWidth;
+        picture.displayHeight = window.innerHeight;*/
+        //picture.setVisible(false);
+  
+        //this.rt.draw( picture, window.innerWidth/2, window.innerHeight/2 );
+        
+      //}, 5000);
+      
       this.painted = true;
     }
+  }
+
+  drawStart( pointer ) {
+
+
     
 
     //let pix = this.getPixelXY( idt, 2,2 );
@@ -370,21 +471,35 @@ export class MainScene extends Phaser.Scene {
   }
 
   fillAll ( imgData ){
-    let greys = 0; 
+    let data = [];
+    let greys = 0;
     for ( let x = 0; x < window.innerWidth; x ++ ){
       for ( let y = 0; y < window.innerHeight; y ++ ){
         let color:Array<number> = this.getPixelXY( imgData, x, y );
         if ( color[0] === 255 && color[1] === 255 && color[2] === 255 ){
-          this.fill( imgData, x, y, greys );
+          const newData = this.fill( imgData, x, y, greys );
+          data.push( newData );
           greys ++;
         }
       }
     }
-    console.log( greys );
+    console.log( data );
+    return data;
   }
 
   fill ( imgData, x, y, grey ) {
     //this.colorMap = new Array(window.innerWidth).fill(false).map(() => new Array(window.innerHeight).fill(false));
+
+    
+    const cvs = document.createElement('canvas');
+    cvs.width = imgData.width; 
+    cvs.height = imgData.height;
+    const ctx = cvs.getContext("2d");
+    ctx.clearRect( 0,0,cvs.width,cvs.height );
+    let newData = ctx.getImageData(0,0,cvs.width,cvs.height);
+    
+
+
 
     let chooseRand = [];
     chooseRand.push([255,0,0,255]);
@@ -407,6 +522,7 @@ export class MainScene extends Phaser.Scene {
         
           //this.setPixelXY( imgData, x, y, chooseRandColor )
           this.setPixelXY( imgData, x, y, chooseCol )
+          this.setPixelXY( newData, x, y, [255,255,255,255]);
           list.push({x:x - 1, y});
           list.push({x:x + 1, y});
           list.push({x, y: y - 1});
@@ -431,7 +547,7 @@ export class MainScene extends Phaser.Scene {
     //this.rt.draw( this.fillGraph,0,0 );
 
 
-
+    return newData;
   }
 
   drawUpdate( pointer ) {
