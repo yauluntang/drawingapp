@@ -50,6 +50,7 @@ export class MainScene extends Phaser.Scene {
   public mouseCurrentlyOver: any;
 
   public currentKey: any;
+  public tempRt: any;
 
   constructor ()
   {
@@ -161,24 +162,31 @@ export class MainScene extends Phaser.Scene {
       });*/
 
       this.mouseCurrentlyOver = null;
-    
+
+      
       this.graphics = this.add.graphics({ fillStyle: { color: 0x000000 } });
       
       this.graphics.setVisible(false);
       this.rtMap = {};
 
+      
+
       this.input.on('pointerdown', (pointer, currentlyOver)=>{ 
         if ( currentlyOver && currentlyOver[0]  ){
-          let key = currentlyOver[0].texture.key;
-          this.currentKey = key;
+          
+          
           this.graphics.clear();
-          this.graphics.setMask(currentlyOver[0].createBitmapMask());
+          //this.graphics.setMask( currentlyOver[0].createBitmapMask() );
           this.graphics.fillStyle(0x00ff00);
           this.graphics.fillCircleShape( new Phaser.Geom.Circle(pointer.x, pointer.y, 50));
-          
-          let rt = this.rtMap[key];
-            rt.draw( this.graphics,0,0 );
-            console.log( key, rt );
+
+          //this.rt.draw( this.graphics );
+          //this.rt.erase( currentlyOver[0] );
+
+          this.tempRt = this.add.renderTexture(0,0,window.innerWidth, window.innerHeight);
+          this.tempRt.setMask( currentlyOver[0].createBitmapMask() )
+          this.tempRt.draw( this.graphics,0,0 );
+          //this.rt.draw( this.tempRt,0,0);
         }
         /*
         for ( let i = 0; i < currentlyOver.length; i ++ ){
@@ -188,41 +196,39 @@ export class MainScene extends Phaser.Scene {
        });
       
       this.input.on('pointerup', (pointer, currentlyOver)=>{ 
-        this.mouseDown = false;
-
+        
+        this.currentKey = null;
+        //this.rt.draw( this.tempRt,0,0 );
+        //this.tempRt.destroy();
+        
+        if ( this.tempRt ){
+          this.tempRt.snapshot((image:HTMLImageElement)=>{
+            console.log( image.width, image.height)
+            if (this.textures.exists('temp'))
+            {
+              this.textures.remove('temp');
+            }
+            this.textures.addImage('temp', image);
+            let temp = this.add.sprite(window.innerWidth,window.innerHeight,'temp' );
+            this.rt.draw( temp,window.innerWidth/2,window.innerHeight/2);
+            temp.destroy();  
+            this.tempRt.destroy();
+            this.tempRt = null;
+          });
+        }
        });
-      /*
-this.input.on('pointerdownoutside', function(pointer){ 
-        console.log( 'pointerdownoutside');
-       });
-    
-      this.input.on('pointerupoutside', function(pointer){
-        console.log( 'pointerupoutside');
-       });
 
-    */
-      this.input.on('pointermove', (pointer, currentlyOver) => { 
-
-        if ( this.currentKey ){
-          
+       this.input.on('pointermove', (pointer, currentlyOver) => { 
+        
           if ( pointer.isDown ){
             this.graphics.clear();
-            //this.graphics.setMask(currentlyOver[0].createBitmapMask());
+            //this.graphics.setMask( currentlyOver[0].createBitmapMask() );
             this.graphics.fillStyle(0x00ff00);
             this.graphics.fillCircleShape( new Phaser.Geom.Circle(pointer.x, pointer.y, 50));
-            
-  
-            
-            let rt = this.rtMap[this.currentKey];
-            rt.draw( this.graphics,0,0, window.innerWidth, window.innerHeight );
-  
-            //this.rt.draw( this.graphics,0,0 );
-            //this.rt.setMask(currentlyOver[0].createBitmapMask());
+            //this.rt.draw( this.graphics );
+            this.tempRt.draw( this.graphics,0,0 );
           }
-        }
-        
-
-
+          
        });
 
        
@@ -277,7 +283,7 @@ this.input.on('pointerdownoutside', function(pointer){
       }*/
 
 
-      //this.rt = this.add.renderTexture(0,0,window.innerWidth, window.innerHeight);
+      this.rt = this.add.renderTexture(0,0,window.innerWidth, window.innerHeight);
 
       this.debug = this.add.text(10, 10, '', { font: '16px Courier', color: '#00ff00' });
       //this.debug2 = this.add.text(10, 25, '', { font: '16px Courier', fill: '#00ff00' });
@@ -436,11 +442,12 @@ this.input.on('pointerdownoutside', function(pointer){
             this.layers[key] = this.add.sprite(window.innerWidth/2, window.innerHeight/2, key);
             this.layers[key].setInteractive(this.input.makePixelPerfect(1));
             this.debug.setDepth(1);
-            
+            /*
             let rt = this.add.renderTexture(0,0,window.innerWidth, window.innerHeight);
             this.rtMap[key] = rt;
             rt.setMask( this.layers[key].createBitmapMask() );
-            rt.setDepth(2);
+            rt.setDepth(2);*/
+            this.rt.setDepth(2);
             this.picture.setDepth(3);
           }
         });
