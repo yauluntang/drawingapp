@@ -20,7 +20,8 @@
     "@capacitor/cli": "^1.5.3",
     "@capacitor/core": "^1.5.3",
     "@capacitor/ios": "^2.4.6",
-    "phaser": "3.52.0"
+    "phaser": "3.52.0",
+    "pngjs": "^6.0.0"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^5.0.2",
