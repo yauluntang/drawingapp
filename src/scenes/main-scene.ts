@@ -29,6 +29,7 @@ export class MainScene extends Phaser.Scene {
   public picture: any;
 
   public rt: any;
+  public rtMap: any;
 
   public grabGraphic: any;
   public colorMap: any;
@@ -48,6 +49,8 @@ export class MainScene extends Phaser.Scene {
 
   public mouseCurrentlyOver: any;
 
+  public currentKey: any;
+
   constructor ()
   {
     super({
@@ -59,7 +62,8 @@ export class MainScene extends Phaser.Scene {
   {
       this.load.path = 'assets/drawings/';
 
-      this.load.image('bird', 'bird.png');
+      this.load.image('bird', 'birda.png');
+      this.load.image('birdt', 'birdt.png');
 
       this.load.image('pen', 'pen.png');
   }
@@ -67,7 +71,7 @@ export class MainScene extends Phaser.Scene {
   create ()
   {
     this.pencolor = null;
-    console.log( this );
+    
     this.colors = [0xe20000, 0x228B22, 0x6495ED, 0xffff00, 0xff00ff, 0x00ffff, 0x000000, 0xffffff ];
     this.curves = [];
     this.colorMap = new Array(window.innerWidth).fill(null).map(() => new Array(window.innerHeight).fill(null));
@@ -110,9 +114,7 @@ export class MainScene extends Phaser.Scene {
       this.input.on('pointermove', this.drawUpdate, this);
       this.input.on('pointerup', this.drawStop, this);
 
-      this.picture = this.add.sprite(window.innerWidth/2, window.innerHeight/2, 'bird');
-      this.picture.displayWidth = window.innerWidth;
-      this.picture.displayHeight = window.innerHeight;
+      
       this.picture.setVisible(false);
 
       this.rt.draw( this.picture, window.innerWidth/2, window.innerHeight/2 );
@@ -122,9 +124,12 @@ export class MainScene extends Phaser.Scene {
 
 */
 
+      this.picture = this.add.sprite(window.innerWidth/2, window.innerHeight/2, 'birdt');
+      this.picture.displayWidth = window.innerWidth;
+      this.picture.displayHeight = window.innerHeight;
+  
       this.mouseDown = false;
-      let base = this.textures.getBase64('bird');
-      console.log( base );
+      let base = this.textures.getBase64('birdt');
       const image = new Image();
       image.src = base;
       image.width = window.innerWidth;
@@ -157,17 +162,33 @@ export class MainScene extends Phaser.Scene {
 
       this.mouseCurrentlyOver = null;
     
-      this.input.on('pointerdown', function(pointer, currentlyOver){ 
-        this.mouseDown = true;
-        console.log( 'pointerdown');
+      this.graphics = this.add.graphics({ fillStyle: { color: 0x000000 } });
+      
+      this.graphics.setVisible(false);
+      this.rtMap = {};
+
+      this.input.on('pointerdown', (pointer, currentlyOver)=>{ 
+        if ( currentlyOver && currentlyOver[0]  ){
+          let key = currentlyOver[0].texture.key;
+          this.currentKey = key;
+          this.graphics.clear();
+          this.graphics.setMask(currentlyOver[0].createBitmapMask());
+          this.graphics.fillStyle(0x00ff00);
+          this.graphics.fillCircleShape( new Phaser.Geom.Circle(pointer.x, pointer.y, 50));
+          
+          let rt = this.rtMap[key];
+            rt.draw( this.graphics,0,0 );
+            console.log( key, rt );
+        }
+        /*
         for ( let i = 0; i < currentlyOver.length; i ++ ){
           currentlyOver[i].setTint(0xff0000);
-        }
+
+        }*/
        });
       
-      this.input.on('pointerup', function(pointer, currentlyOver){ 
+      this.input.on('pointerup', (pointer, currentlyOver)=>{ 
         this.mouseDown = false;
-        console.log( 'pointerup');
 
        });
       /*
@@ -179,16 +200,32 @@ this.input.on('pointerdownoutside', function(pointer){
         console.log( 'pointerupoutside');
        });
 
-    
-      this.input.on('pointermove', function(pointer, currentlyOver){ 
-        console.log( 'pointermove');
-        if ( currentlyOver ){
-          console.log( currentlyOver );
-          this.mouseCurrentlyOver = currentlyOver;
-          //currentlyOver.setTint(0xff0000);
+    */
+      this.input.on('pointermove', (pointer, currentlyOver) => { 
+
+        if ( this.currentKey ){
           
+          if ( pointer.isDown ){
+            this.graphics.clear();
+            //this.graphics.setMask(currentlyOver[0].createBitmapMask());
+            this.graphics.fillStyle(0x00ff00);
+            this.graphics.fillCircleShape( new Phaser.Geom.Circle(pointer.x, pointer.y, 50));
+            
+  
+            
+            let rt = this.rtMap[this.currentKey];
+            rt.draw( this.graphics,0,0, window.innerWidth, window.innerHeight );
+  
+            //this.rt.draw( this.graphics,0,0 );
+            //this.rt.setMask(currentlyOver[0].createBitmapMask());
+          }
         }
+        
+
+
        });
+
+       
        /*
       this.input.on('pointerover', function(pointer, justOver){
         console.log( 'pointerover');
@@ -240,7 +277,8 @@ this.input.on('pointerdownoutside', function(pointer){
       }*/
 
 
-      
+      //this.rt = this.add.renderTexture(0,0,window.innerWidth, window.innerHeight);
+
       this.debug = this.add.text(10, 10, '', { font: '16px Courier', color: '#00ff00' });
       //this.debug2 = this.add.text(10, 25, '', { font: '16px Courier', fill: '#00ff00' });
 
@@ -379,19 +417,33 @@ this.input.on('pointerdownoutside', function(pointer){
 
       let idt = this.getImageData( rawImage );
 
+      
       this.data = this.fillAll( idt );
-
+      console.log( this.data );
       //setTimeout(()=>{
         for ( let i = 0; i < this.data.length; i ++ ){
           let dataimage = this.getImage64( this.data[i] );
           this.textures.addBase64( 'data_'+i, dataimage );
-          this.textures.on('addtexture', (key)=>{
+          
+          
+        }
+
+        
+        this.textures.on('addtexture', (key)=>{
+          
+          if ( key.indexOf("data_") !== -1 ){
+            console.log( 'addtext')
             this.layers[key] = this.add.sprite(window.innerWidth/2, window.innerHeight/2, key);
             this.layers[key].setInteractive(this.input.makePixelPerfect(1));
             this.debug.setDepth(1);
-          })
-          
-        }
+            
+            let rt = this.add.renderTexture(0,0,window.innerWidth, window.innerHeight);
+            this.rtMap[key] = rt;
+            rt.setMask( this.layers[key].createBitmapMask() );
+            rt.setDepth(2);
+            this.picture.setDepth(3);
+          }
+        });
 
         
   
@@ -476,15 +528,22 @@ this.input.on('pointerdownoutside', function(pointer){
     for ( let x = 0; x < window.innerWidth; x ++ ){
       for ( let y = 0; y < window.innerHeight; y ++ ){
         let color:Array<number> = this.getPixelXY( imgData, x, y );
-        if ( color[0] === 255 && color[1] === 255 && color[2] === 255 ){
+        if ( !this.boundary(color) ){
           const newData = this.fill( imgData, x, y, greys );
           data.push( newData );
           greys ++;
         }
       }
     }
-    console.log( data );
+    console.log('greys'+ greys);
     return data;
+  }
+
+  boundary( color ){
+    return ( color[0] === 0 && color[1] === 0 && color[2] === 0 && color[3] >= 128 );
+  }
+  filled( color ){
+    return ( color[0] === 255 && color[1] === 255 && color[2] === 255 && color[3] === 255 );
   }
 
   fill ( imgData, x, y, grey ) {
@@ -513,15 +572,18 @@ this.input.on('pointerdownoutside', function(pointer){
 
     let chooseRandColor = Math.floor(grey % chooseRand.length) ;
     let chooseCol = chooseRand[chooseRandColor];
-    console.log( chooseCol);
+    
     let fillColor = (x,y) => {
       let color:Array<number> = this.getPixelXY( imgData, x, y );
       
       if ( x >= 0 && y >= 0 && x < window.innerWidth && y < window.innerHeight ){
-        if ( color[0] === 255 && color[1] === 255 && color[2] === 255 ){
+
+
+        if ( !this.boundary(color) ){
+          
         
           //this.setPixelXY( imgData, x, y, chooseRandColor )
-          this.setPixelXY( imgData, x, y, chooseCol )
+          this.setPixelXY( imgData, x, y, [0,0,0,255] )
           this.setPixelXY( newData, x, y, [255,255,255,255]);
           list.push({x:x - 1, y});
           list.push({x:x + 1, y});
@@ -541,7 +603,7 @@ this.input.on('pointerdownoutside', function(pointer){
         maxlength = list.length;
       }
     }
-    console.log( maxlength ); 
+    
 
     
     //this.rt.draw( this.fillGraph,0,0 );
