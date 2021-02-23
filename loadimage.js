@@ -64,7 +64,7 @@ const setPixelXY = (imgData, x, y, color) => {
 }
 
 const boundary = ( color ) => {
-    return ( color[0] === 0 && color[1] === 0 && color[2] === 0 && color[3] >= 128 );
+    return ( color[0] === 0 && color[1] === 0 && color[2] === 0 && color[3] >= 200 );
 }
 
 const fillAll = ( imgData ) => {
