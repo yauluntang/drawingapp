@@ -4,9 +4,11 @@ declare const BUILD_TARGET: string;
 
 // main game configuration
 const config: Phaser.Types.Core.GameConfig = {
-    width: window.innerWidth,
-    height: window.innerHeight,
     type: Phaser.AUTO,
+    width: window.innerWidth * window.devicePixelRatio, // set game width by multiplying window width with devicePixelRatio
+    height: window.innerHeight * window.devicePixelRatio, // set game height by multiplying window height with devicePixelRatio
+    zoom: 1 / window.devicePixelRatio, // Set the zoom to the inverse of the devicePixelRatio
+
     parent: "game",
     scene: MainScene,
     physics: {
