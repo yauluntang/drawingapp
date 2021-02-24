@@ -369,7 +369,7 @@ export class MainScene extends Phaser.Scene {
     this.currentSectionIndex = null;
     this.loadPic( `birdt` );
     this.cameras.main.backgroundColor.setTo(255,255,255);
-    this.debug = this.add.text(10,10,"",{ font: "16px Arial Black", color: "#00ff00" })
+    this.debug = this.add.text(50,50,"",{ font: "200px Arial Black", color: "#00ff00" })
     this.graphics = this.add.graphics();
     this.graphics.setVisible(false);
     
