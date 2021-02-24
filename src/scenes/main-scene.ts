@@ -138,14 +138,13 @@ export class MainScene extends Phaser.Scene {
   drawColorPlate() {
 
   }
-  hsv2rgb=(h,s,v,f=(n,k=(n+h/60)%6)=>v-v*s*Math.max(Math.min(k,4-k,1),0))=>[f(5),f(3),f(1)];
-  
   HSVtoRGB(h, s, v) {
     var r, g, b;
     var i;
     var f, p, q, t;
      
     // Make sure our arguments stay in-range
+
     h = Math.max(0, Math.min(360, h));
     s = Math.max(0, Math.min(100, s));
     v = Math.max(0, Math.min(100, v));
@@ -307,14 +306,6 @@ export class MainScene extends Phaser.Scene {
     
     this.drawToolbar( height, 0xffffdd );
 
-    /*
-    this.toolBarGraphic.on('pointerover',()=>{
-      this.drawToolbar( height, 0xffff00 );
-    });
-
-    this.toolBarGraphic.on('pointerout',()=>{
-      this.drawToolbar( height, 0xffffdd );
-    })*/
 
   }
 
@@ -348,7 +339,10 @@ export class MainScene extends Phaser.Scene {
     
 
     for ( let i = 0; i <= 11; i ++ ){
-      this.sections.push(this.loadPic( `birdt_out_${i}` ));
+      const mask = this.loadPic( `birdt_out_${i}` );
+      this.sections.push(mask);
+      mask.setTint(0xff0000)
+      mask.alpha = 255;
     }
 
     this.rt = this.add.renderTexture( 0,0,this.width, this.height);
