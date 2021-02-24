@@ -29,6 +29,10 @@ export class MainScene extends Phaser.Scene {
   public isColorLayerOpen: boolean;
 
 
+  public width: number;
+  public height: number;
+
+
 
   constructor ()
   {
@@ -72,7 +76,7 @@ export class MainScene extends Phaser.Scene {
     
     this.toolBarGraphic.fillStyle(0xeeeeee, 1);
 
-    const x = window.innerWidth * 0.8;
+    const x = this.width * 0.8;
     const y = height * 0.025;
     
     const h = height * 0.95;
@@ -218,7 +222,8 @@ export class MainScene extends Phaser.Scene {
   }
   createToolbar( height ){
 
-    const x = window.innerWidth * 0.8;
+
+    const x = this.width * 0.8;
     const y = height * 0.025;
     
     const h = height * 0.95;
@@ -321,9 +326,12 @@ export class MainScene extends Phaser.Scene {
   create ()
   {
 
-    this.picSize = window.innerWidth > window.innerHeight ? window.innerHeight : window.innerWidth;
+    this.width = window.innerWidth * window.devicePixelRatio;
+    this.height = window.innerHeight * window.devicePixelRatio;
+    
+    this.picSize = this.width > this.height ? this.height : this.width;
 
-    this.picX = window.innerWidth / 2 - this.picSize / 2;
+    this.picX = this.width / 2 - this.picSize / 2;
     this.picY = 0;
     
 
@@ -343,7 +351,7 @@ export class MainScene extends Phaser.Scene {
       this.sections.push(this.loadPic( `birdt_out_${i}` ));
     }
 
-    this.rt = this.add.renderTexture( 0,0,window.innerWidth, window.innerHeight);
+    this.rt = this.add.renderTexture( 0,0,this.width, this.height);
 
     const pic = this.add.sprite( this.picX, this.picY, "birdt");
     pic.setOrigin(0,0)
@@ -380,7 +388,7 @@ export class MainScene extends Phaser.Scene {
           this.graphics.fillStyle(this.currentColor, 1);
           this.graphics.fillCircle(pointer.x, pointer.y, this.currentThickness);
           
-          this.tempRt = this.add.renderTexture( 0,0,window.innerWidth, window.innerHeight);
+          this.tempRt = this.add.renderTexture( 0,0,this.width, this.height);
           this.tempRt.alpha = 0.1;
           this.tempRt.draw( this.graphics );
           this.tempRt.erase( this.alphaSections[this.currentSectionIndex] );
